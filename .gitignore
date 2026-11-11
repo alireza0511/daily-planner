@@ -1,0 +1,6 @@
+# The unencrypted plan never goes to GitHub
+private/
+*.plain.html
+
+.DS_Store
+node_modules/
