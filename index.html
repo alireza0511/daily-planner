@@ -74,8 +74,10 @@ main{max-width:760px;margin:0 auto;padding:0 16px calc(var(--nav-h) + 40px + env
 .nav button[aria-current="page"]{color:var(--paper);border-top-color:var(--chalk)}
 
 /* ---------- Day strip ---------- */
-.days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:8px 0 20px}
-.days button{position:relative;background:transparent;border:1px solid var(--rule);border-radius:4px;padding:8px 0 10px;font-family:var(--display);font-weight:800;font-size:18px;color:var(--steel)}
+.days{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 20px}
+.days .dn{display:block;font-size:26px;line-height:1}
+.days .dt{display:block;font-family:var(--body);font-weight:700;font-size:12px;line-height:1.25;margin-top:3px;padding:0 4px}
+.days button{position:relative;background:transparent;border:1px solid var(--rule);border-radius:4px;padding:10px 0 12px;font-family:var(--display);font-weight:800;font-size:18px;color:var(--steel)}
 .days button.today{color:var(--ink);border-color:var(--ink)}
 .days button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper)}
 .days button .logged{position:absolute;left:50%;bottom:4px;width:14px;height:3px;margin-left:-7px;background:var(--chalk);border-radius:2px}
@@ -318,16 +320,14 @@ const PIN_HASH = '330e14d4ae80612334d94c488d29eb469626b476864abdeb5c1bd261db461c
 const STORE_KEY = 'workout.v1';
 const UNLOCK_KEY = 'workout.unlocked';
 
+/* Three sessions a week. "when" is the suggested day: pulling stays
+   three days clear of Sunday climbing, with a rest day between sessions. */
 const DAYS = [
-  { id: 'mon', name: 'Monday',    short: 'Mon' },
-  { id: 'tue', name: 'Tuesday',   short: 'Tue' },
-  { id: 'wed', name: 'Wednesday', short: 'Wed' },
-  { id: 'thu', name: 'Thursday',  short: 'Thu' },
-  { id: 'fri', name: 'Friday',    short: 'Fri' },
-  { id: 'sat', name: 'Saturday',  short: 'Sat' },
-  { id: 'sun', name: 'Sunday',    short: 'Sun' }
+  { id: 'a', name: 'Session A', short: 'A', when: 'Monday' },
+  { id: 'b', name: 'Session B', short: 'B', when: 'Wednesday' },
+  { id: 'c', name: 'Session C', short: 'C', when: 'Friday' }
 ];
-const JS_DAY = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+const OLD_DAY_NAMES = { mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' };
 const LOCS = { home: 'Home', gym: 'Gym' };
 
 /* =====================================================================
@@ -338,129 +338,62 @@ const LOCS = { home: 'Home', gym: 'Gym' };
    or after Settings > Reset plan to default.
    ===================================================================== */
 const DEFAULT_PLAN = {
-  mon: {
-    home: { title: 'Push', focus: 'Chest, shoulders, triceps. Bodyweight first, cable and dumbbells add load.', minutes: 55, exercises: [
+  a: {
+    home: { title: 'Push & legs', focus: 'Chest, shoulders, triceps and legs. Bodyweight first; cable and dumbbells add load.', minutes: 60, exercises: [
       ['Push-ups on push-up board', 4, '8–15', 'Push-up board', 'Tempo 3-1-1. Move to a deficit once every set reaches 15.'],
       ['Pike push-up, feet on bench', 3, '6–10', 'Bench attachment', 'Handstand push-up builder. Head travels in front of the hands.'],
+      ['Goblet squat', 3, '10–12', 'Dumbbell', '3-second lowering.'],
       ['Standing cable chest press', 3, '10–12', 'Cable, 2 × D-handle, pulleys at chest height', ''],
-      ['Seated dumbbell shoulder press', 3, '8–10', 'Dumbbells, bench upright', ''],
+      ['Bulgarian split squat', 3, '8 /leg', 'Dumbbells, bench attachment', ''],
       ['Cable lateral raise', 3, '12–15 /side', 'Cable, D-handle, low pulley', '', 'A'],
       ['Cable overhead triceps extension', 3, '10–12', 'Cable, tricep rope, low pulley', '', 'A']
     ]},
-    gym: { title: 'Push', focus: 'Chest, shoulders, triceps with barbell loading.', minutes: 60, exercises: [
+    gym: { title: 'Push & legs', focus: 'Barbell pressing and squatting, then shoulder and triceps work.', minutes: 60, exercises: [
       ['Barbell bench press', 4, '5–8', 'Barbell, flat bench', 'Leave 1–2 reps in reserve on the last set.'],
+      ['Barbell back squat', 3, '5–8', 'Barbell, squat rack', ''],
       ['Parallel-bar dips', 3, '6–10', 'Dip station', 'Add a belt or dumbbell once 3 × 10 is easy.'],
       ['Standing barbell overhead press', 3, '6–8', 'Barbell, rack', ''],
-      ['Cable fly', 3, '12', 'Cable, 2 × D-handle, mid pulley', ''],
       ['Cable lateral raise', 3, '12–15 /side', 'Cable, D-handle, low pulley', '', 'A'],
       ['Cable triceps pushdown', 3, '10–12', 'Cable, tricep rope, high pulley', '', 'A']
     ]}
   },
-  tue: {
-    home: { title: 'Legs & core', focus: 'Lower body and trunk so the upper-body days have a base.', minutes: 50, exercises: [
-      ['Goblet squat', 4, '10–12', 'Dumbbell', '3-second lowering.'],
-      ['Bulgarian split squat', 3, '8 /leg', 'Dumbbells, bench attachment', ''],
-      ['Kettlebell swing', 3, '15', 'Kettlebell 20 lb', ''],
-      ['Cable pull-through', 3, '12', 'Cable, tricep rope, low pulley', ''],
-      ['Cable hip abduction', 2, '15 /side', 'Cable, ankle cuff, low pulley', '', 'A'],
-      ['Cable woodchop, high to low', 3, '10 /side', 'Cable, chop bar, high pulley', '', 'A'],
-      ['Hollow body hold', 3, '30', 'Floor', '', '', 'time']
-    ]},
-    gym: { title: 'Legs & core', focus: 'Barbell lower body plus trunk work.', minutes: 60, exercises: [
-      ['Barbell back squat', 4, '5–8', 'Barbell, squat rack', ''],
-      ['Romanian deadlift', 3, '8', 'Barbell', ''],
-      ['Walking lunge', 3, '10 /leg', 'Dumbbells', ''],
-      ['Cable glute kickback', 2, '12 /side', 'Cable, ankle cuff, low pulley', '', 'A'],
-      ['Cable woodchop, high to low', 3, '10 /side', 'Cable, D-handle, high pulley', '', 'A'],
-      ['Rower, easy', 1, '600', 'Rowing machine', 'Steady pace, nasal breathing.', '', 'time']
-    ]}
-  },
-  wed: {
-    home: { title: 'Pull', focus: 'Back, biceps, grip. Wednesday keeps pulling three days clear of Sunday climbing.', minutes: 55, exercises: [
+  b: {
+    home: { title: 'Pull & core', focus: 'Back, biceps, grip and trunk. Best on Wednesday so pulling stays three days clear of Sunday climbing.', minutes: 60, exercises: [
       ['Leaning cable body row', 4, '8–12', 'Cable, 2 × D-handle, mid pulley', 'Stands in for inverted rows. Walk the feet forward to make it harder.'],
       ['Half-kneeling single-arm cable pulldown', 3, '10–12 /arm', 'Cable, D-handle, high pulley', ''],
       ['One-arm dumbbell row', 3, '8–10 /arm', 'Dumbbell, bench attachment', ''],
+      ['Kettlebell swing', 3, '15', 'Kettlebell 20 lb', ''],
       ['Cable face pull', 3, '15', 'Cable, tricep rope, high pulley', '', 'A'],
       ['Cable curl', 3, '10–12', 'Cable, chop bar, low pulley', 'Keep the load modest; the elbows also work hard on the wall.', 'A'],
-      ['Farmer hold', 2, '40', 'Dumbbells, heavy', 'Skip if forearms are still sore from Sunday.', '', 'time']
+      ['Hollow body hold', 3, '30', 'Floor', '', '', 'time']
     ]},
-    gym: { title: 'Pull', focus: 'Back, biceps, grip with a bar to hang from.', minutes: 60, exercises: [
+    gym: { title: 'Pull & core', focus: 'Pull-ups and rows, a hinge for the posterior chain, then face pulls and curls.', minutes: 60, exercises: [
       ['Pull-ups', 4, '5–8', 'Pull-up bar', 'Add weight once 4 × 8 is clean.'],
       ['Barbell bent-over row', 3, '6–8', 'Barbell', ''],
-      ['Seated cable row', 3, '10–12', 'Cable, close-grip handle', ''],
+      ['Romanian deadlift', 3, '8', 'Barbell', ''],
       ['Wide-grip lat pulldown', 3, '10', 'Cable, lat bar', ''],
       ['Cable face pull', 3, '15', 'Cable, rope, high pulley', '', 'A'],
       ['EZ-bar curl', 3, '8–10', 'EZ bar', '', 'A']
     ]}
   },
-  thu: {
-    home: { title: 'Tendons & mobility', focus: 'Knee and elbow bulletproofing: slow eccentrics and isometric holds. Light day.', minutes: 35, exercises: [
-      ['Foam roll upper back & lats', 1, '180', 'Foam roller', '', '', 'time'],
-      ['Eccentric wrist curl', 2, '15', 'Dumbbell, light, bench attachment', '4 seconds down.'],
-      ['Eccentric reverse wrist curl', 2, '15', 'Dumbbell, light', 'Outer-elbow tendon. 4 seconds down.'],
-      ['Cable triceps isometric hold', 3, '30', 'Cable, tricep rope, high pulley', 'Hold at a 90° elbow bend.', '', 'time'],
-      ['Wall sit', 3, '45', 'Wall', 'Knee tendon isometric.', '', 'time'],
-      ['Slow step-down from bench', 3, '8 /leg', 'Bench attachment', '4-second lowering, knee tracks over toes.'],
-      ['Cable external rotation', 2, '15 /side', 'Cable, D-handle, elbow height', '']
-    ]},
-    gym: { title: 'Tendons & mobility', focus: 'Same tendon work with a walk to warm up. Light day.', minutes: 40, exercises: [
-      ['Treadmill incline walk', 1, '600', 'Treadmill', '', '', 'time'],
-      ['Eccentric wrist curl', 2, '15', 'Dumbbell, light', '4 seconds down.'],
-      ['Eccentric reverse wrist curl', 2, '15', 'Dumbbell, light', 'Outer-elbow tendon. 4 seconds down.'],
-      ['Cable triceps isometric hold', 3, '30', 'Cable, rope, high pulley', 'Hold at a 90° elbow bend.', '', 'time'],
-      ['Spanish squat or wall sit', 3, '45', 'Band or wall', 'Knee tendon isometric.', '', 'time'],
-      ['Slow step-down from box', 3, '8 /leg', 'Plyo box', '4-second lowering.'],
-      ['Cable external rotation', 2, '15 /side', 'Cable, D-handle, elbow height', '']
-    ]}
-  },
-  fri: {
-    home: { title: 'Skills & arms', focus: 'Handstand, planche lean and L-sit practice while fresh, then arms.', minutes: 50, exercises: [
+  c: {
+    home: { title: 'Skills, arms & tendons', focus: 'Handstand, planche lean and L-sit while fresh, then arms and elbow-tendon work for climbing.', minutes: 55, exercises: [
       ['Wall handstand hold', 5, '20–40', 'Wall', 'Chest to wall. End the set when the shoulders stop pushing tall.', '', 'time'],
       ['Planche lean', 4, '15–20', 'Push-up board handles', '', '', 'time'],
       ['Tuck L-sit', 4, '10–20', 'Push-up board handles or bench', '', '', 'time'],
       ['Single-arm cable curl', 3, '10–12 /arm', 'Cable, D-handle, low pulley', '', 'A'],
       ['Cable overhead triceps extension', 3, '12', 'Cable, tricep rope, low pulley', '', 'A'],
-      ['Hammer curl', 2, '12', 'Dumbbells', '']
+      ['Eccentric wrist curl', 2, '15', 'Dumbbell, light, bench attachment', '4 seconds down.', 'B'],
+      ['Eccentric reverse wrist curl', 2, '15', 'Dumbbell, light', 'Outer-elbow tendon. 4 seconds down.', 'B']
     ]},
-    gym: { title: 'Skills & arms', focus: 'Skill holds on gym equipment, then arms.', minutes: 50, exercises: [
+    gym: { title: 'Skills, arms & tendons', focus: 'Skill holds on gym equipment, arms, then knee and shoulder tendon work.', minutes: 55, exercises: [
       ['Wall handstand hold', 5, '20–40', 'Wall', 'Chest to wall.', '', 'time'],
       ['Planche lean', 4, '15–20', 'Floor or parallettes', '', '', 'time'],
       ['L-sit on dip bars', 4, '10–20', 'Dip station', 'Tuck if legs-straight breaks form.', '', 'time'],
       ['Incline dumbbell curl', 3, '10', 'Dumbbells, incline bench', '', 'A'],
       ['Cable triceps pushdown', 3, '12', 'Cable, tricep rope, high pulley', '', 'A'],
-      ['Cable hammer curl', 2, '12', 'Cable, rope, low pulley', '']
-    ]}
-  },
-  sat: {
-    home: { title: 'Light conditioning', focus: 'Easy full-body circuit. Keep grip fresh for Sunday.', minutes: 35, exercises: [
-      ['Push-ups on push-up board', 3, '12', 'Push-up board', ''],
-      ['Kettlebell goblet squat', 3, '12', 'Kettlebell 20 lb', ''],
-      ['Kettlebell swing', 3, '15', 'Kettlebell 20 lb', ''],
-      ['Cable woodchop, high to low', 3, '10 /side', 'Cable, chop bar, high pulley', ''],
-      ['Dead bug', 3, '10 /side', 'Floor', ''],
-      ['Foam roll', 1, '300', 'Foam roller', '', '', 'time']
-    ]},
-    gym: { title: 'Light conditioning', focus: 'Rower intervals and an easy circuit. Keep grip fresh for Sunday.', minutes: 40, exercises: [
-      ['Rower intervals', 6, '60', 'Rowing machine', '60 s hard, 60 s easy.', '', 'time'],
-      ['Push-ups', 3, '12', 'Floor', ''],
-      ['Goblet squat', 3, '12', 'Dumbbell', ''],
-      ['Cable woodchop, high to low', 3, '10 /side', 'Cable, D-handle, high pulley', ''],
-      ['Dead bug', 3, '10 /side', 'Floor', ''],
-      ['Treadmill cooldown walk', 1, '300', 'Treadmill', '', '', 'time']
-    ]}
-  },
-  sun: {
-    home: { title: 'Climbing day', focus: 'Climb first. This is the short cooldown afterwards. Put climbing time in the session duration and grades in the notes.', minutes: 15, exercises: [
-      ['Foam roll lats & upper back', 1, '120', 'Foam roller', '', '', 'time'],
-      ['Wrist flexor & extensor stretch', 2, '30', 'None', '', '', 'time'],
-      ['Cable external rotation, light', 2, '15 /side', 'Cable, D-handle, elbow height', ''],
-      ['Reverse wrist curl, light', 2, '15', 'Dumbbell, light', '']
-    ]},
-    gym: { title: 'Climbing day', focus: 'Climb first. This is the short cooldown afterwards. Put climbing time in the session duration and grades in the notes.', minutes: 15, exercises: [
-      ['Foam roll lats & upper back', 1, '120', 'Foam roller', '', '', 'time'],
-      ['Wrist flexor & extensor stretch', 2, '30', 'None', '', '', 'time'],
-      ['Cable external rotation, light', 2, '15 /side', 'Cable, D-handle, elbow height', ''],
-      ['Reverse wrist curl, light', 2, '15', 'Dumbbell, light', '']
+      ['Slow step-down from box', 3, '8 /leg', 'Plyo box', '4-second lowering.'],
+      ['Cable external rotation', 2, '15 /side', 'Cable, D-handle, elbow height', '']
     ]}
   }
 };
@@ -638,8 +571,15 @@ function fmtDate(iso, withYear) {
   return d.toLocaleDateString(undefined, opts);
 }
 function weekday(iso) { return dateOf(iso).toLocaleDateString(undefined, { weekday: 'short' }); }
-function todayId() { return JS_DAY[new Date().getDay()]; }
-function dayName(id) { const d = DAYS.find(x => x.id === id); return d ? d.name : id; }
+/* Next session in the A → B → C rotation, after the most recent one logged. */
+function todayId() {
+  const last = S && S.sessions.slice().sort((a, b) => (b.date + (b.createdAt || '')).localeCompare(a.date + (a.createdAt || ''))).find(s => DAYS.some(d => d.id === s.dayId));
+  if (!last) return DAYS[0].id;
+  const i = DAYS.findIndex(d => d.id === last.dayId);
+  return DAYS[(i + 1) % DAYS.length].id;
+}
+function dayName(id) { const d = DAYS.find(x => x.id === id); return d ? d.name : (OLD_DAY_NAMES[id] || id); }
+function dayWhen(id) { const d = DAYS.find(x => x.id === id); return d ? d.when : ''; }
 function norm(s) { return String(s || '').trim().toLowerCase(); }
 function wU() { return S.settings.w; }
 function lU() { return S.settings.l; }
@@ -793,7 +733,7 @@ function weekLogged() {
   const end = new Date(mon); end.setDate(mon.getDate() + 6);
   const endIso = isoOf(end);
   const set = new Set();
-  S.sessions.forEach(s => { if (s.date >= start && s.date <= endIso) set.add(s.dayId || JS_DAY[dateOf(s.date).getDay()]); });
+  S.sessions.forEach(s => { if (s.date >= start && s.date <= endIso) set.add(s.dayId); });
   return set;
 }
 
@@ -822,9 +762,10 @@ function dayStrip(scope) {
   const sel = scope === 'plan' ? ui.planDay : ui.day;
   const logged = scope === 'train' ? weekLogged() : new Set();
   const t = todayId();
-  return '<div class="days" role="group" aria-label="Day of the week">' + DAYS.map(d =>
-    `<button data-act="day" data-scope="${scope}" data-day="${d.id}" aria-pressed="${d.id === sel}" class="${d.id === t ? 'today' : ''}" aria-label="${d.name}${d.id === t ? ', today' : ''}${logged.has(d.id) ? ', logged this week' : ''}">${d.short}${logged.has(d.id) ? '<span class="logged"></span>' : ''}</button>`
-  ).join('') + '</div>';
+  return '<div class="days" role="group" aria-label="Session">' + DAYS.map(d => {
+    const p = S.plan[d.id] && S.plan[d.id][scope === 'plan' ? ui.planLoc : ui.loc];
+    return `<button data-act="day" data-scope="${scope}" data-day="${d.id}" aria-pressed="${d.id === sel}" class="${scope === 'train' && d.id === t ? 'today' : ''}" aria-label="${d.name}${scope === 'train' && d.id === t ? ', up next' : ''}${logged.has(d.id) ? ', done this week' : ''}"><span class="dn">${d.short}</span><span class="dt">${esc(p ? p.title : '')}</span>${logged.has(d.id) ? '<span class="logged"></span>' : ''}</button>`;
+  }).join('') + '</div>';
 }
 function locToggle(scope) {
   const cur = scope === 'plan' ? ui.planLoc : ui.loc;
@@ -840,11 +781,11 @@ function viewTrain() {
   html += `<div class="hero">
     <div><h1 class="dayname">${dayName(ui.day)}</h1><p class="ptitle">${esc(p.title)}</p></div>
     ${locToggle('train')}
-    <p class="focus">${esc(p.focus)}${p.minutes ? ' About ' + esc(p.minutes) + ' minutes.' : ''}</p>
+    <p class="focus">${esc(p.focus)}${p.minutes ? ' About ' + esc(p.minutes) + ' minutes.' : ''} Suggested day: ${dayWhen(ui.day)}.</p>
     ${draftHasData(d) ? '<p class="draftnote">Session in progress. It’s kept on this device until you save or discard it.</p>' : ''}
   </div>`;
   if (!p.exercises.length) {
-    html += `<div class="empty">No exercises for ${LOCS[ui.loc].toLowerCase()} on ${dayName(ui.day)}. Add some in the Plan tab.</div>`;
+    html += `<div class="empty">No exercises for ${LOCS[ui.loc].toLowerCase()} in ${dayName(ui.day)}. Add some in the Plan tab.</div>`;
   } else {
     html += '<div class="log">' + p.exercises.map((ex, i) => exBlock(ex, i, p.exercises)).join('') + '</div>';
     html += '<p class="tip">Tap ✓ on an empty set to repeat last time’s numbers. Leave weight empty for bodyweight.</p>';
@@ -1063,7 +1004,7 @@ function viewPlan() {
   const other = ui.planLoc === 'home' ? 'gym' : 'home';
   document.body.dataset.loc = ui.planLoc;
   let html = `<div class="pagehead"><h1>Plan</h1></div>
-    <p class="lede">Edit what each day looks like at home and at the gym. Changes save as you type and show up in Train right away.</p>`;
+    <p class="lede">Edit what each of the three weekly sessions looks like at home and at the gym. Changes save as you type and show up in Train right away.</p>`;
   html += dayStrip('plan');
   html += `<div style="margin-bottom:16px">${locToggle('plan')}</div>`;
   html += `<section class="panel" style="margin-top:0"><h2>${dayName(ui.planDay)}, ${LOCS[ui.planLoc].toLowerCase()}</h2>
@@ -1215,6 +1156,7 @@ const acts = {
       else S.body.push({ id: uid(), date: session.date, weight: session.bodyweight, notes: '' });
     }
     delete S.drafts[dKey()];
+    ui.day = todayId();
     persist(true); render(); window.scrollTo(0, 0);
     toast('Session saved' + (session.bodyweight != null ? ', body weight added to Body' : ''));
   },
@@ -1330,14 +1272,14 @@ function buildPrompt(sess, plan) {
   if (lw && fw && fw.date !== lw.date) line(`- Body weight change since ${fmtDate(fw.date, true)}: ${deltaTxt(lw.v, fw.v, W)}`);
   if (S.profile.goal) line(`- Goal body weight: ${S.profile.goal} ${W}`);
   if (S.profile.notes) line(`- Goals and notes: ${S.profile.notes}`);
-  line('- Training style: calisthenics-first upper-body strength at home (cable functional trainer, dumbbells, kettlebells, push-up board) plus a gym; rock climbing on Sundays; sessions capped at about 60 minutes.');
+  line('- Training style: three sessions a week (A push & legs, B pull & core, C skills, arms & tendons), calisthenics-first, at home (cable functional trainer, dumbbells, kettlebells, push-up board) or a gym; rock climbing on Sundays; sessions capped at about 60 minutes.');
   const latest = bodySorted()[0];
   if (latest) {
     const parts = BODY_FIELDS.filter(f => latest[f.k] != null && f.k !== 'weight').map(f => `${f.label.toLowerCase()} ${fmtN(latest[f.k])}${f.unit === '%' ? '%' : ' ' + L}`);
     if (parts.length) line(`- Latest measurements (${fmtDate(latest.date, true)}): ${parts.join(', ')}`);
   }
   line('');
-  line(`## Session: ${dayName(sess.dayId)} ${sess.title || ''}, ${LOCS[sess.loc] || sess.loc}, ${fmtDate(sess.date, true)}`);
+  line(`## Session: ${dayName(sess.dayId)} (${sess.title || ''}), ${weekday(sess.date)}, ${LOCS[sess.loc] || sess.loc}, ${fmtDate(sess.date, true)}`);
   if (plan && plan.focus) line(`Planned focus: ${plan.focus}`);
   const meta = [sess.duration != null ? `${sess.duration} min` : '', sess.energy != null ? `energy ${sess.energy}/5 (${ENERGY[sess.energy - 1] || ''})` : '', sess.bodyweight != null ? `body weight ${fmtN(sess.bodyweight)} ${W}` : ''].filter(Boolean);
   if (meta.length) line(meta.join(' | '));

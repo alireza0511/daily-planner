@@ -5,7 +5,7 @@ A single-page workout tracker for training at home and at the gym. It's one `ind
 ## What it does
 
 - **Locked with a PIN.** The app opens to a keypad. The PIN is **1099**. Each new browser tab asks again, and **Lock** in the top corner locks it right away.
-- **Train.** Every day of the week has two plans, one for **Home** and one for **Gym**. Pick a day, pick a location, and log each set's **weight** and **reps** (or seconds for holds).
+- **Train.** Each of the three weekly sessions (A, B, C) has two plans, one for **Home** and one for **Gym**. Pick a session, pick a location, and log each set's **weight** and **reps** (or seconds for holds).
   - Each exercise shows what you did **last time**, and those numbers appear as hints in the inputs. Tap ✓ on an empty set to repeat last time's numbers.
   - **Add set** and **Remove last set** change how many sets you do.
   - **Session details** covers the date, a timer, duration, energy (1–5), body weight that day and notes.
@@ -14,22 +14,20 @@ A single-page workout tracker for training at home and at the gym. It's one `ind
   - **Learn more** on any exercise opens a panel over the page with a YouTube demo that plays inline (`playsinline`, so iPhones don't jump to fullscreen), start and end position photos, and the equipment and notes. Closing the panel stops the video.
 - **History.** Every saved session grouped by month, with sets, duration and volume, plus **Exercise progress**: pick an exercise to see every time you logged it and your top set.
 - **Body.** Log body weight, body fat and measurements (neck, shoulders, chest, waist, hips, arms, forearm, thighs, calf). It shows the change since the previous entry and since your first one, BMI (once your height is set), and how far you are from your goal weight. A body weight entered in a session is added here too.
-- **Plan.** Edit any day for home or gym: title, focus, and each exercise's sets, target, equipment and cable attachment, superset letter, notes, YouTube link and image links. Exercises can be reordered, added or deleted, and **Copy to Gym/Home** duplicates a day's plan to the other location.
+- **Plan.** Edit any session for home or gym: title, focus, and each exercise's sets, target, equipment and cable attachment, superset letter, notes, YouTube link and image links. Exercises can be reordered, added or deleted, and **Copy to Gym/Home** duplicates a session's plan to the other location.
 - **Settings.** Switch between lb/kg and in/cm, **export a backup** (JSON), **import a backup**, reset the plan to the default, or erase everything.
 
 ## Default weekly plan
 
-Sessions are kept to about an hour or less. Pull day is on Wednesday so it stays three days away from Sunday climbing.
+Three sessions a week, about an hour or less each, rotating A → B → C. The app opens on whichever session is next after the last one you logged, and marks the sessions you've done this week.
 
-| Day | Home | Gym |
-|---|---|---|
-| Mon | Push: board push-ups, pike push-ups, cable chest press, DB press, lateral raise + rope triceps superset | Push: bench press, dips, overhead press, cable fly, lateral raise + pushdown superset |
-| Tue | Legs & core: goblet squat, split squat, KB swing, pull-through, abduction + woodchop superset, hollow hold | Legs & core: back squat, RDL, lunges, kickback + woodchop superset, easy row |
-| Wed | Pull: leaning cable body row, kneeling pulldown, DB row, face pull + cable curl superset, farmer hold | Pull: pull-ups, barbell row, cable row, lat pulldown, face pull + EZ curl superset |
-| Thu | Tendons & mobility: eccentric wrist work, isometric holds, slow step-downs, external rotation | Same tendon work, starting with an incline walk |
-| Fri | Skills & arms: handstand hold, planche lean, tuck L-sit, curl + triceps superset, hammer curl | Skills & arms on gym equipment |
-| Sat | Light conditioning circuit that keeps grip fresh | Rower intervals plus a light circuit |
-| Sun | Climbing day, with a 15-minute cooldown | Same |
+| Session | Suggested day | Home | Gym |
+|---|---|---|---|
+| A: Push & legs | Monday | Board push-ups, pike push-ups, goblet squat, cable chest press, Bulgarian split squat, lateral raise + rope triceps superset | Bench press, back squat, dips, overhead press, lateral raise + pushdown superset |
+| B: Pull & core | Wednesday | Leaning cable body row, kneeling single-arm pulldown, DB row, KB swing, face pull + cable curl superset, hollow hold | Pull-ups, barbell row, RDL, lat pulldown, face pull + EZ curl superset |
+| C: Skills, arms & tendons | Friday | Handstand hold, planche lean, tuck L-sit, curl + triceps superset, eccentric wrist curls | Handstand hold, planche lean, L-sit, curl + pushdown superset, slow step-downs, external rotation |
+
+Wednesday keeps pulling three days away from Sunday climbing. The suggested days are only a guide; do the next session whenever you train.
 
 Every cable exercise names its attachment and pulley height. There are no starting weights: the first time you log an exercise sets the baseline, and after that the app shows your last numbers so progression follows what you actually lifted.
 
