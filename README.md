@@ -46,6 +46,23 @@ Built-in demos are matched by exercise name, so an exercise you add or rename (e
 
 > Videos play on `localhost` and on GitHub Pages. If you double-click `index.html` and open it straight from disk (`file://`), YouTube refuses to play embedded videos, so the panel shows a **watch on YouTube** link instead. Photos work either way.
 
+## Install it as an app (PWA)
+
+The app is a Progressive Web App: it installs to your home screen, opens full screen without browser bars, and works offline at the gym.
+
+- **iPhone / iPad (Safari):** open the GitHub Pages URL → Share → **Add to Home Screen**.
+- **Android (Chrome):** open the URL → menu → **Install app** (or accept the install prompt).
+- **Mac / PC (Chrome or Edge):** click the install icon in the address bar.
+
+How it works:
+
+- `manifest.webmanifest` gives the name, colors and icons (`icons/`).
+- `sw.js` is the service worker. The page loads network-first, so you get the latest version whenever you're online and the cached one offline. Exercise photos and fonts are cached the first time they're shown. YouTube demos need a connection.
+- After changing `index.html` nothing else is needed. If you change the icons or manifest, bump `VERSION` at the top of `sw.js`.
+- Service workers only run over https (GitHub Pages) or on `localhost`, not from `file://`.
+
+> **Your data doesn't move automatically.** On iPhone the installed app has its own storage, separate from Safari. Before switching, use **Settings → Export backup** in Safari, then **Import backup** in the installed app.
+
 ## Run it locally
 
 From this folder:
