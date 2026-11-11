@@ -923,6 +923,10 @@ function sessionPanel(d) {
       <button class="btn" data-act="save-session">Save session</button>
       <button class="btn ghost" data-act="discard">Discard</button>
     </div>
+    <div class="actions" style="margin-top:12px">
+      <button class="btn ghost slim" data-act="copy-draft">Copy for Claude</button>
+      <span class="tip" style="margin:0">Copies a detailed summary of this session, your goals and your body stats, ready to paste into Claude.</span>
+    </div>
   </section>`;
 }
 
@@ -959,7 +963,7 @@ function viewHistory() {
         <ul>${s.exercises.map(e => `<li><b>${esc(e.name)}</b>${e.sets.map(st => esc(fmtSet(st, e.type))).join(', ')}</li>`).join('')}</ul>
         ${s.bodyweight != null ? `<p class="snote">Body weight: ${fmtN(s.bodyweight)} ${wU()}</p>` : ''}
         ${s.notes ? `<p class="snote">${esc(s.notes)}</p>` : ''}
-        <div class="actions"><button class="small danger" data-act="del-session" data-id="${s.id}">Delete this session</button></div>
+        <div class="actions"><button class="small" data-act="copy-session" data-id="${s.id}">Copy for Claude</button><button class="small danger" data-act="del-session" data-id="${s.id}">Delete this session</button></div>
       </div>
     </details>`;
   });
@@ -1271,6 +1275,21 @@ const acts = {
     S = defaultState(); persist(true); render(); toast('All data erased');
   },
   learn(b) { openLearn(b); },
+  'copy-draft'() {
+    const d = draft(false) || {};
+    const p = curPlan();
+    const exercises = p.exercises.map(ex => {
+      const arr = (d.sets && d.sets[ex.id]) || [];
+      return { name: ex.name, type: ex.type, equip: ex.equip, sets: arr.filter(x => x.w !== '' || x.r !== '' || x.done).map(x => ({ w: num(x.w), r: num(x.r) })) };
+    });
+    let duration = num(d.duration);
+    if (duration == null && d.startedAt) duration = Math.round((Date.now() - d.startedAt) / 60000);
+    copyText(buildPrompt({ date: d.date || todayISO(), dayId: ui.day, loc: ui.loc, title: p.title, duration, energy: num(d.energy), bodyweight: num(d.bodyweight), notes: d.notes || '', exercises }, p));
+  },
+  'copy-session'(b) {
+    const s = S.sessions.find(x => x.id === b.dataset.id); if (!s) return;
+    copyText(buildPrompt(s, S.plan[s.dayId] && S.plan[s.dayId][s.loc]));
+  },
   'learn-close'() { closeLearn(); },
   lock() { persist(true); try { sessionStorage.removeItem(UNLOCK_KEY); } catch (e) { /* ignore */ } showLock(); }
 };
@@ -1293,6 +1312,80 @@ function refreshDraftNote() {
     p.textContent = 'Session in progress. It’s kept on this device until you save or discard it.';
     $('.hero').appendChild(p);
   } else if (!has && note) note.remove();
+}
+
+/* =====================================================================
+   Copy for Claude
+   ===================================================================== */
+function buildPrompt(sess, plan) {
+  const W = wU(), L = lU(), out = [];
+  const line = t => out.push(t);
+  line(`I'm sharing a workout session from my training log. Please review it and help me improve my body composition and strength toward my goals.`);
+  line('');
+  line('## About me');
+  if (S.profile.height) line(`- Height: ${S.profile.height} ${L}`);
+  const lw = latestVal('weight');
+  if (lw) line(`- Latest body weight: ${fmtN(lw.v)} ${W} (${fmtDate(lw.date, true)})`);
+  const fw = firstVal('weight');
+  if (lw && fw && fw.date !== lw.date) line(`- Body weight change since ${fmtDate(fw.date, true)}: ${deltaTxt(lw.v, fw.v, W)}`);
+  if (S.profile.goal) line(`- Goal body weight: ${S.profile.goal} ${W}`);
+  if (S.profile.notes) line(`- Goals and notes: ${S.profile.notes}`);
+  line('- Training style: calisthenics-first upper-body strength at home (cable functional trainer, dumbbells, kettlebells, push-up board) plus a gym; rock climbing on Sundays; sessions capped at about 60 minutes.');
+  const latest = bodySorted()[0];
+  if (latest) {
+    const parts = BODY_FIELDS.filter(f => latest[f.k] != null && f.k !== 'weight').map(f => `${f.label.toLowerCase()} ${fmtN(latest[f.k])}${f.unit === '%' ? '%' : ' ' + L}`);
+    if (parts.length) line(`- Latest measurements (${fmtDate(latest.date, true)}): ${parts.join(', ')}`);
+  }
+  line('');
+  line(`## Session: ${dayName(sess.dayId)} ${sess.title || ''}, ${LOCS[sess.loc] || sess.loc}, ${fmtDate(sess.date, true)}`);
+  if (plan && plan.focus) line(`Planned focus: ${plan.focus}`);
+  const meta = [sess.duration != null ? `${sess.duration} min` : '', sess.energy != null ? `energy ${sess.energy}/5 (${ENERGY[sess.energy - 1] || ''})` : '', sess.bodyweight != null ? `body weight ${fmtN(sess.bodyweight)} ${W}` : ''].filter(Boolean);
+  if (meta.length) line(meta.join(' | '));
+  line('');
+  line('| Exercise | Target | Done today | Last time |');
+  line('|---|---|---|---|');
+  const planEx = plan ? plan.exercises : [];
+  const names = planEx.length ? planEx.map(e => e.name) : sess.exercises.map(e => e.name);
+  names.forEach(n => {
+    const pe = planEx.find(e => e.name === n);
+    const done = sess.exercises.find(e => norm(e.name) === norm(n));
+    const type = (done && done.type) || (pe && pe.type) || 'reps';
+    const target = pe ? `${pe.sets} × ${pe.reps}${type === 'time' ? ' s' : ''}` : '';
+    const doneTxt = done && done.sets.length ? done.sets.map(x => fmtSet(x, type)).join(', ') : 'skipped';
+    let prev = '';
+    for (const s of sortedSessions()) {
+      if (s.id === sess.id || s.date > sess.date) continue;
+      const e = s.exercises.find(e => norm(e.name) === norm(n));
+      if (e && e.sets.length) { prev = `${fmtDate(s.date)}: ${e.sets.map(x => fmtSet(x, e.type)).join(', ')}`; break; }
+    }
+    line(`| ${n}${pe && pe.equip ? ` (${pe.equip})` : ''} | ${target} | ${doneTxt} | ${prev || 'none'} |`);
+  });
+  if (sess.notes) { line(''); line(`My notes: ${sess.notes}`); }
+  const since = new Date(dateOf(sess.date)); since.setDate(since.getDate() - 28);
+  const recent = S.sessions.filter(s => s.id !== sess.id && s.date >= isoOf(since) && s.date <= sess.date).sort((a, b) => a.date.localeCompare(b.date));
+  line('');
+  line(`## The 4 weeks before this session`);
+  line(`- ${recent.length} other session${recent.length === 1 ? '' : 's'} logged${recent.length ? ': ' + recent.map(s => `${fmtDate(s.date)} ${s.title || dayName(s.dayId)} (${LOCS[s.loc] || s.loc})`).join('; ') : ''}`);
+  line('');
+  line('## What I want from you');
+  line('1. How did this session go against the targets and against last time? Call out wins and anything that slipped.');
+  line('2. Concrete targets for next time for each exercise (weight, reps or hold time), based on what I actually logged.');
+  line('3. Any changes to exercise choice, order, volume or rest that would serve my goals better, keeping the session under an hour.');
+  line('4. Recovery, nutrition or body-composition advice that fits my numbers and goals.');
+  line('Be direct. Ask me if anything important is missing.');
+  return out.join('\n');
+}
+function copyText(text) {
+  const ok = () => toast('Copied. Paste it into Claude.');
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    let done = false; try { done = document.execCommand('copy'); } catch (e) { /* ignore */ }
+    ta.remove();
+    done ? ok() : toast('Couldn’t copy. Your browser blocked the clipboard.');
+  };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
 }
 
 /* =====================================================================

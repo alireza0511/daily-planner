@@ -10,6 +10,7 @@ A single-page workout tracker for training at home and at the gym. It's one `ind
   - **Add set** and **Remove last set** change how many sets you do.
   - **Session details** covers the date, a timer, duration, energy (1–5), body weight that day and notes.
   - An unfinished session is saved as you type, so a refresh or a closed tab doesn't lose sets. **Save session** moves it to History.
+  - **Copy for Claude** (under Session details, and on each session in History) copies a detailed prompt: your goals, height, latest body stats, the session's planned versus actual sets, last time's numbers, your last 4 weeks, and specific questions. Paste it into Claude for feedback and next-session targets.
   - **Learn more** on any exercise opens a panel over the page with a YouTube demo that plays inline (`playsinline`, so iPhones don't jump to fullscreen), start and end position photos, and the equipment and notes. Closing the panel stops the video.
 - **History.** Every saved session grouped by month, with sets, duration and volume, plus **Exercise progress**: pick an exercise to see every time you logged it and your top set.
 - **Body.** Log body weight, body fat and measurements (neck, shoulders, chest, waist, hips, arms, forearm, thighs, calf). It shows the change since the previous entry and since your first one, BMI (once your height is set), and how far you are from your goal weight. A body weight entered in a session is added here too.
