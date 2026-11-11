@@ -182,9 +182,13 @@ legend{font-size:14px;font-weight:700;padding:0;margin-bottom:6px}
 .energy span{display:block;padding:8px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--well);font-size:14px;font-weight:700}
 .energy input:checked + span{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .energy input:focus-visible + span{outline:3px solid var(--chalk);outline-offset:1px}
-.timer{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:700}
-.timer .tv{font-family:var(--display);font-weight:800;font-size:26px;line-height:46px}
-.timer .row{display:flex;align-items:center;gap:12px;min-height:46px}
+.timerbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;margin:0 -16px 8px;padding:10px 16px;background:var(--zinc);border-bottom:1px solid var(--rule)}
+.timerbar .tb-label{flex:1;font-weight:700;font-size:15px;line-height:1.2}
+.timerbar .tb-label small{display:block;font-weight:400;font-size:13px;color:var(--steel)}
+.timerbar .tv{font-family:var(--display);font-weight:800;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.timerbar.running{background:var(--ink);color:var(--paper);border-bottom-color:var(--ink)}
+.timerbar.running small{color:#A9B8BE}
+.timerbar.running .small{color:var(--chalk)}
 .actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:18px}
 .btn{background:var(--ink);color:var(--paper);border:2px solid var(--ink);border-radius:6px;padding:10px 22px;min-height:50px;font-family:var(--display);font-weight:800;font-size:22px;line-height:1}
 .btn.ghost{background:transparent;color:var(--ink)}
@@ -340,40 +344,41 @@ const LOCS = { home: 'Home', gym: 'Gym' };
 const DEFAULT_PLAN = {
   a: {
     home: { title: 'Push & legs', focus: 'Chest, shoulders, triceps and legs. Bodyweight first; cable and dumbbells add load.', minutes: 60, exercises: [
-      ['Push-ups on push-up board', 4, '8–15', 'Push-up board', 'Tempo 3-1-1. Move to a deficit once every set reaches 15.'],
-      ['Pike push-up, feet on bench', 3, '6–10', 'Bench attachment', 'Handstand push-up builder. Head travels in front of the hands.'],
-      ['Goblet squat', 3, '10–12', 'Dumbbell', '3-second lowering.'],
-      ['Standing cable chest press', 3, '10–12', 'Cable, 2 × D-handle, pulleys at chest height', ''],
-      ['Bulgarian split squat', 3, '8 /leg', 'Dumbbells, bench attachment', ''],
-      ['Cable lateral raise', 3, '12–15 /side', 'Cable, D-handle, low pulley', '', 'A'],
-      ['Cable overhead triceps extension', 3, '10–12', 'Cable, tricep rope, low pulley', '', 'A']
+      ['Push-ups on push-up board', 4, '8–15', 'Push-up board', 'Bodyweight. Tempo 3-1-1. Move to a deficit once every set reaches 15.'],
+      ['Pike push-up, feet on bench', 3, '6–10', 'Bench attachment', 'Bodyweight. Handstand push-up builder. Head travels in front of the hands.'],
+      ['Goblet squat', 3, '10–12', 'Dumbbell', 'Est. start: 40 lb dumbbell. 3-second lowering.'],
+      ['Standing cable chest press', 3, '10–12', 'Cable, 2 × D-handle, pulleys at chest height', 'Est. start: 20 lb per side.'],
+      ['Bulgarian split squat', 3, '8 /leg', 'Dumbbells, bench attachment', 'Est. start: 2 × 20 lb.'],
+      ['Cable lateral raise', 3, '12–15 /side', 'Cable, D-handle, low pulley', 'Est. start: 5 lb.', 'A'],
+      ['Cable overhead triceps extension', 3, '10–12', 'Cable, tricep rope, low pulley', 'Est. start: 25 lb.', 'A']
     ]},
-    gym: { title: 'Push & legs', focus: 'Barbell pressing and squatting, then shoulder and triceps work.', minutes: 60, exercises: [
-      ['Barbell bench press', 4, '5–8', 'Barbell, flat bench', 'Leave 1–2 reps in reserve on the last set.'],
-      ['Barbell back squat', 3, '5–8', 'Barbell, squat rack', ''],
-      ['Parallel-bar dips', 3, '6–10', 'Dip station', 'Add a belt or dumbbell once 3 × 10 is easy.'],
-      ['Standing barbell overhead press', 3, '6–8', 'Barbell, rack', ''],
-      ['Cable lateral raise', 3, '12–15 /side', 'Cable, D-handle, low pulley', '', 'A'],
-      ['Cable triceps pushdown', 3, '10–12', 'Cable, tricep rope, high pulley', '', 'A']
+    gym: { title: 'Push & legs', focus: 'Squat first while fresh, then pressing, lunges, and shoulder and triceps work. Barbell weights are logged as plates only (45 lb bar).', minutes: 55, exercises: [
+      ['Barbell back squat', 3, '5–8', 'Barbell, squat rack', 'Start: 50 lb plates (95 lb total). Add 20 lb a session while sets end with 3+ reps left, then 10 lb.'],
+      ['Barbell bench press', 4, '5–8', 'Barbell, flat bench', 'Start: 70 lb plates (115 lb total). Last set 1–2 reps in reserve. All sets at 8 → +10 lb.'],
+      ['Standing barbell overhead press', 3, '6–8', 'Barbell, rack', 'Start: 30 lb plates (75 lb total). All sets at 8 → +5–10 lb.', 'A'],
+      ['Walking lunge', 3, '8 /leg', 'Dumbbells', 'Est. start: 2 × 20 lb.', 'A'],
+      ['Parallel-bar dips', 3, '8–10', 'Assisted dip machine', 'Logged weight = assistance. Start: 35 lb assist. 3 × 10 → 10 lb less assist.', 'B'],
+      ['Cable lateral raise', 3, '12–15 /side', 'Cable, D-handle, low pulley', 'Start: 5 lb. 3 × 15 → 7.5 lb.', 'B'],
+      ['Cable triceps pushdown', 2, '10–12', 'Cable, tricep rope, high pulley', 'Start: 42.5 lb. 2 × 12 → 50 lb.']
     ]}
   },
   b: {
     home: { title: 'Pull & core', focus: 'Back, biceps, grip and trunk. Best on Wednesday so pulling stays three days clear of Sunday climbing.', minutes: 60, exercises: [
-      ['Leaning cable body row', 4, '8–12', 'Cable, 2 × D-handle, mid pulley', 'Stands in for inverted rows. Walk the feet forward to make it harder.'],
-      ['Half-kneeling single-arm cable pulldown', 3, '10–12 /arm', 'Cable, D-handle, high pulley', ''],
-      ['One-arm dumbbell row', 3, '8–10 /arm', 'Dumbbell, bench attachment', ''],
-      ['Kettlebell swing', 3, '15', 'Kettlebell 20 lb', ''],
-      ['Cable face pull', 3, '15', 'Cable, tricep rope, high pulley', '', 'A'],
-      ['Cable curl', 3, '10–12', 'Cable, chop bar, low pulley', 'Keep the load modest; the elbows also work hard on the wall.', 'A'],
-      ['Hollow body hold', 3, '30', 'Floor', '', '', 'time']
+      ['Leaning cable body row', 4, '8–12', 'Cable, 2 × D-handle, mid pulley', 'Est. start: 30 lb per side. Stands in for inverted rows. Walk the feet forward to make it harder.'],
+      ['Half-kneeling single-arm cable pulldown', 3, '10–12 /arm', 'Cable, D-handle, high pulley', 'Est. start: 30 lb.'],
+      ['One-arm dumbbell row', 3, '8–10 /arm', 'Dumbbell, bench attachment', 'Est. start: 40 lb.'],
+      ['Kettlebell swing', 3, '15', 'Kettlebell 20 lb', '20 lb (heaviest available). Swing explosively; go to 20 reps once 15 is easy.'],
+      ['Cable face pull', 3, '15', 'Cable, tricep rope, high pulley', 'Est. start: 20 lb.', 'A'],
+      ['Cable curl', 3, '10–12', 'Cable, chop bar, low pulley', 'Est. start: 25 lb. Keep the load modest; the elbows also work hard on the wall.', 'A'],
+      ['Hollow body hold', 3, '30', 'Floor', 'Bodyweight.', '', 'time']
     ]},
-    gym: { title: 'Pull & core', focus: 'Pull-ups and rows, a hinge for the posterior chain, then face pulls and curls.', minutes: 60, exercises: [
-      ['Pull-ups', 4, '5–8', 'Pull-up bar', 'Add weight once 4 × 8 is clean.'],
-      ['Barbell bent-over row', 3, '6–8', 'Barbell', ''],
-      ['Romanian deadlift', 3, '8', 'Barbell', ''],
-      ['Wide-grip lat pulldown', 3, '10', 'Cable, lat bar', ''],
-      ['Cable face pull', 3, '15', 'Cable, rope, high pulley', '', 'A'],
-      ['EZ-bar curl', 3, '8–10', 'EZ bar', '', 'A']
+    gym: { title: 'Pull & core', focus: 'Pull-ups and rows, a hinge for the posterior chain, then face pulls and curls. Barbell weights are logged as plates only (45 lb bar).', minutes: 60, exercises: [
+      ['Pull-ups', 4, '5–8', 'Pull-up bar', 'Est. start: bodyweight. If fewer than 5 reps, use the assisted machine (log the assist). Add weight once 4 × 8 is clean.'],
+      ['Barbell bent-over row', 3, '6–8', 'Barbell', 'Est. start: 50 lb plates (95 lb total).'],
+      ['Romanian deadlift', 3, '8', 'Barbell', 'Est. start: 50 lb plates (95 lb total). Learn the hinge first; add 20 lb a session while it feels easy.'],
+      ['Wide-grip lat pulldown', 3, '10', 'Cable, lat bar', 'Est. start: 100 lb.'],
+      ['Cable face pull', 3, '15', 'Cable, rope, high pulley', 'Est. start: 30 lb.', 'A'],
+      ['EZ-bar curl', 3, '8–10', 'EZ bar', 'Est. start: 20 lb plates on the EZ bar.', 'A']
     ]}
   },
   c: {
@@ -381,19 +386,19 @@ const DEFAULT_PLAN = {
       ['Wall handstand hold', 5, '20–40', 'Wall', 'Chest to wall. End the set when the shoulders stop pushing tall.', '', 'time'],
       ['Planche lean', 4, '15–20', 'Push-up board handles', '', '', 'time'],
       ['Tuck L-sit', 4, '10–20', 'Push-up board handles or bench', '', '', 'time'],
-      ['Single-arm cable curl', 3, '10–12 /arm', 'Cable, D-handle, low pulley', '', 'A'],
-      ['Cable overhead triceps extension', 3, '12', 'Cable, tricep rope, low pulley', '', 'A'],
-      ['Eccentric wrist curl', 2, '15', 'Dumbbell, light, bench attachment', '4 seconds down.', 'B'],
-      ['Eccentric reverse wrist curl', 2, '15', 'Dumbbell, light', 'Outer-elbow tendon. 4 seconds down.', 'B']
+      ['Single-arm cable curl', 3, '10–12 /arm', 'Cable, D-handle, low pulley', 'Est. start: 15 lb.', 'A'],
+      ['Cable overhead triceps extension', 3, '12', 'Cable, tricep rope, low pulley', 'Est. start: 25 lb.', 'A'],
+      ['Eccentric wrist curl', 2, '15', 'Dumbbell, light, bench attachment', 'Est. start: 10 lb. 4 seconds down.', 'B'],
+      ['Eccentric reverse wrist curl', 2, '15', 'Dumbbell, light', 'Est. start: 5–10 lb. Outer-elbow tendon. 4 seconds down.', 'B']
     ]},
     gym: { title: 'Skills, arms & tendons', focus: 'Skill holds on gym equipment, arms, then knee and shoulder tendon work.', minutes: 55, exercises: [
       ['Wall handstand hold', 5, '20–40', 'Wall', 'Chest to wall.', '', 'time'],
       ['Planche lean', 4, '15–20', 'Floor or parallettes', '', '', 'time'],
       ['L-sit on dip bars', 4, '10–20', 'Dip station', 'Tuck if legs-straight breaks form.', '', 'time'],
-      ['Incline dumbbell curl', 3, '10', 'Dumbbells, incline bench', '', 'A'],
-      ['Cable triceps pushdown', 3, '12', 'Cable, tricep rope, high pulley', '', 'A'],
-      ['Slow step-down from box', 3, '8 /leg', 'Plyo box', '4-second lowering.'],
-      ['Cable external rotation', 2, '15 /side', 'Cable, D-handle, elbow height', '']
+      ['Incline dumbbell curl', 3, '10', 'Dumbbells, incline bench', 'Est. start: 20 lb dumbbells.', 'A'],
+      ['Cable triceps pushdown', 3, '12', 'Cable, tricep rope, high pulley', 'Start: 35 lb (12 reps on 11/11).', 'A'],
+      ['Slow step-down from box', 3, '8 /leg', 'Plyo box', 'Bodyweight. 4-second lowering.'],
+      ['Cable external rotation', 2, '15 /side', 'Cable, D-handle, elbow height', 'Est. start: 5 lb. Keep it light.']
     ]}
   }
 };
@@ -777,7 +782,7 @@ function locToggle(scope) {
 function viewTrain() {
   const p = curPlan();
   const d = draft(false);
-  let html = dayStrip('train');
+  let html = timerBar(d) + dayStrip('train');
   html += `<div class="hero">
     <div><h1 class="dayname">${dayName(ui.day)}</h1><p class="ptitle">${esc(p.title)}</p></div>
     ${locToggle('train')}
@@ -838,9 +843,20 @@ function exBlock(ex, i, list) {
 
 function timerText(d) {
   if (!d || !d.startedAt) return '';
-  const mins = Math.max(0, Math.round((Date.now() - d.startedAt) / 60000));
-  const st = new Date(d.startedAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
-  return `${mins} min <small style="font-family:var(--body);font-weight:400;font-size:14px;color:var(--steel)">since ${st}</small>`;
+  const sec = Math.max(0, Math.floor((Date.now() - d.startedAt) / 1000));
+  const h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60, x = sec % 60;
+  return (h ? h + ':' + pad(m) : m) + ':' + pad(x);
+}
+function timerBar(d) {
+  if (d && d.startedAt) {
+    const st = new Date(d.startedAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    return `<div class="timerbar running" role="timer" aria-live="off">
+      <span class="tb-label">Session time<small>Started ${st}</small></span>
+      <span class="tv" id="timerVal">${timerText(d)}</span>
+      <button class="small" data-act="timer-reset">Reset</button>
+    </div>`;
+  }
+  return `<div class="timerbar"><span class="tb-label">Session time<small>Not started</small></span><button class="btn slim" data-act="timer-start">Start timer</button></div>`;
 }
 function sessionPanel(d) {
   d = d || {};
@@ -848,11 +864,6 @@ function sessionPanel(d) {
     <h2 id="sessH">Session details</h2>
     <div class="grid">
       <label class="f">Date<input type="date" data-s="date" value="${esc(d.date || todayISO())}"></label>
-      <div class="timer"><span>Timer</span>
-        <div class="row">${d.startedAt
-          ? `<span class="tv" id="timerVal">${timerText(d)}</span><button class="small" data-act="timer-reset">Reset</button>`
-          : `<button class="btn ghost slim" data-act="timer-start">Start timer</button>`}</div>
-      </div>
       <label class="f"><span>Duration <span class="u">(min)</span></span><input type="number" inputmode="numeric" min="0" data-s="duration" value="${esc(d.duration || '')}" placeholder="${d.startedAt ? 'From timer' : 'e.g. 55'}"></label>
       <label class="f"><span>Body weight today <span class="u">(${wU()})</span></span><input type="number" inputmode="decimal" step="any" min="0" data-s="bodyweight" value="${esc(d.bodyweight || '')}" placeholder="Optional"></label>
     </div>
@@ -1130,7 +1141,7 @@ const acts = {
     persist(); rerenderEx(ex.id);
   },
   'timer-start'() { const d = draft(true); d.startedAt = Date.now(); persist(); render(); },
-  'timer-reset'() { const d = draft(true); d.startedAt = null; persist(); render(); },
+  'timer-reset'() { if (!confirm('Reset the session timer?')) return; const d = draft(true); d.startedAt = null; persist(); render(); },
   'save-session'() {
     const d = draft(false);
     const p = curPlan();
@@ -1462,7 +1473,7 @@ $('#importFile').addEventListener('change', e => {
 
 window.addEventListener('pagehide', () => persist(true));
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') persist(true); });
-setInterval(() => { const el = $('#timerVal'); const d = draft(false); if (el && d && d.startedAt) el.innerHTML = timerText(d); }, 30000);
+setInterval(() => { const el = $('#timerVal'); const d = draft(false); if (el && d && d.startedAt) el.textContent = timerText(d); }, 1000);
 
 /* =====================================================================
    Lock screen

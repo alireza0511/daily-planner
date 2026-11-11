@@ -23,13 +23,15 @@ Three sessions a week, about an hour or less each, rotating A → B → C. The a
 
 | Session | Suggested day | Home | Gym |
 |---|---|---|---|
-| A: Push & legs | Monday | Board push-ups, pike push-ups, goblet squat, cable chest press, Bulgarian split squat, lateral raise + rope triceps superset | Bench press, back squat, dips, overhead press, lateral raise + pushdown superset |
+| A: Push & legs | Monday | Board push-ups, pike push-ups, goblet squat, cable chest press, Bulgarian split squat, lateral raise + rope triceps superset | Back squat, bench press, overhead press + walking lunge superset, assisted dips + lateral raise superset, pushdown |
 | B: Pull & core | Wednesday | Leaning cable body row, kneeling single-arm pulldown, DB row, KB swing, face pull + cable curl superset, hollow hold | Pull-ups, barbell row, RDL, lat pulldown, face pull + EZ curl superset |
 | C: Skills, arms & tendons | Friday | Handstand hold, planche lean, tuck L-sit, curl + triceps superset, eccentric wrist curls | Handstand hold, planche lean, L-sit, curl + pushdown superset, slow step-downs, external rotation |
 
 Wednesday keeps pulling three days away from Sunday climbing. The suggested days are only a guide; do the next session whenever you train.
 
-Every cable exercise names its attachment and pulley height. There are no starting weights: the first time you log an exercise sets the baseline, and after that the app shows your last numbers so progression follows what you actually lifted.
+Every cable exercise names its attachment and pulley height. Each exercise's notes give a starting weight: **Start:** is based on a logged session, **Est. start:** is an estimate to adjust after the first session. Barbell weights are logged as plates only (the bar is a standard 45 lb bar), and assisted-machine weights are the assistance. After the first session the app shows your last numbers, so progression follows what you actually lifted.
+
+> Plan changes in `index.html` only reach a browser that already has data after **Settings → Reset plan to default** (this also clears unsaved drafts; saved sessions stay).
 
 ## Demo videos and photos
 
