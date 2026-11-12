@@ -25,6 +25,11 @@ never gets pushed.
 - **Habits**, a **shutdown** checklist, **tomorrow's THE Thing** (copied into
   tomorrow automatically) and **notes**.
 - **Week strip:** 🎯 THE Thing done, 💪 workout logged, 👧 Jonna day.
+- **Dates (Setup tab):** ranges that change specific days: Jonna with her mom
+  or with you, and **Travel** / **Transit** days that switch to a lighter travel
+  schedule with a 📍/✈️ banner. Comes preloaded with November 2026: Jonna with
+  her mom Nov 12 and Nov 19–29; Houston → Barcelona Nov 19, Barcelona Nov 20–24,
+  Valencia Nov 25, London Nov 26, home to Houston Nov 27.
 - **Setup tab:** edit the default template (weekdays, Jonna / no‑Jonna,
   workout‑days only, buffer), Jonna's usual days, workout days, habits, and
   backups.
@@ -37,6 +42,8 @@ never gets pushed.
 | `tools/encrypt.mjs` | Yes | Encrypts `private/plan.html` into `index.html`. Asks for the password; never saves it. |
 | `tools/lock-template.html` | Yes | The password page the encrypted planner is placed into. |
 | `index.html` | Yes | The generated locked page that GitHub Pages serves. |
+| `manifest.webmanifest`, `icons/` | Yes | Makes it an installable app (name, icon, colours). |
+| `sw.js` | Yes | Service worker: works offline, updates when online. Only caches the encrypted page. |
 | `robots.txt`, `.nojekyll` | Yes | Keep search engines away; serve files as‑is. |
 
 - **Page:** AES‑256‑GCM, key from the password via PBKDF2‑SHA256 (600,000
@@ -81,7 +88,23 @@ gh api -X POST repos/{owner}/daily-planner/pages -f "source[branch]=main" -f "so
 ```
 
 The site will be at `https://alireza0511.github.io/daily-planner/`.
-On the phone: open it in Safari → Share → **Add to Home Screen**.
+## Install as an app (PWA)
+
+- **iPhone / iPad:** open the site in Safari → Share → **Add to Home Screen**.
+- **Android / Chrome / Edge:** open the site → menu → **Install app**.
+- **Mac:** Safari → File → **Add to Dock**, or Chrome → **Install Daily Planner**.
+
+It opens full‑screen with its own icon and works offline. After you push a new
+version, it picks it up the next time it opens online.
+
+**iPhone note:** an app added to the Home Screen gets its own storage, separate
+from Safari and from other Home Screen apps. So:
+
+- Start using the planner from the installed app (anything typed in Safari
+  first won't be there; use Export / Import backup to move it).
+- The workout card can't read the Workout app's data there, so it shows the
+  workout day and an **Open** button instead of your next session. On
+  Android and desktop Chrome it still reads it.
 
 Needs **https** (GitHub Pages, or `localhost`): browsers only allow the
 decryption on secure pages.

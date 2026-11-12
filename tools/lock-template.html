@@ -7,6 +7,13 @@
 <meta name="referrer" content="no-referrer">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Daily">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#f6f3ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171c" media="(prefers-color-scheme: dark)">
 <title>Daily</title>
 <style>
   :root { --bg: #f6f3ee; --card: #fff; --ink: #1f2329; --muted: #6b7280; --line: #e7e2d9; --accent: #0f766e; --bad: #dc2626; }
@@ -68,6 +75,9 @@
     try { localStorage.setItem(DATA_SALT_KEY, btoa(String.fromCharCode(...u))); } catch (e) {}
     return u;
   }
+
+  // Offline support + installable app (only runs on https or localhost).
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 
   f.addEventListener("submit", async e => {
     e.preventDefault();
