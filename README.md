@@ -15,6 +15,7 @@ is **not** stored anywhere in this repo, and the readable plan never gets pushed
 | `tools/lock-template.html` | Yes | The keypad page the encrypted plan is placed into. |
 | `index.html` | Yes | The generated locked page that GitHub Pages serves. |
 | `robots.txt`, `.nojekyll` | Yes | Keep search engines away; serve files as-is. |
+| `manifest.webmanifest`, `sw.js`, `icons/` | Yes | Make it an installable app (PWA) that opens offline. |
 
 Encryption: AES-256-GCM with a key derived from the code by PBKDF2-SHA256
 (600,000 rounds, random salt). The browser decrypts it after the code is tapped.
@@ -56,6 +57,14 @@ gh api -X POST repos/{owner}/kids-palnner/pages -f "source[branch]=main" -f "sou
 
 The site will be at `https://<your-github-username>.github.io/kids-palnner/`.
 On the iPad: open it in Safari → Share → **Add to Home Screen**.
+
+## Install as an app (PWA)
+
+- **iPad/iPhone:** open the site in Safari → Share → **Add to Home Screen**. It opens full screen with its own star icon.
+- **Android/Chrome:** menu → **Install app**.
+- It works offline after the first visit. When online it always loads the newest plan.
+- On iPad, the home-screen app keeps its own stars and outfit photos, separate from Safari — so let her use only the app.
+- If you change `sw.js`, the icons or the manifest, bump `VERSION` in `sw.js`.
 
 ## Good to know
 
