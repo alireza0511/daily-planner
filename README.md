@@ -30,6 +30,10 @@ never gets pushed.
   schedule with a 📍/✈️ banner. Comes preloaded with November 2026: Jonna with
   her mom Nov 12 and Nov 19–29; Houston → Barcelona Nov 19, Barcelona Nov 20–24,
   Valencia Nov 25, London Nov 26, home to Houston Nov 27.
+- **End of day:** **📋 Copy for Claude** copies a prompt with the whole day
+  (3 Things, blocks, habits, shutdown, workout, Jonna, calendar, notes, last 7
+  days) for your Claude agent. **💾 Save log** writes the same report to
+  `logs/YYYY-MM-DD.md`. **📅 Day → calendar** exports the day's blocks as `.ics`.
 - **Setup tab:** edit the default template (weekdays, Jonna / no‑Jonna,
   workout‑days only, buffer), Jonna's usual days, workout days, habits, and
   backups.
@@ -41,6 +45,7 @@ never gets pushed.
 | `private/plan.html` | **No** (git‑ignored) | The real planner you edit. Never committed. |
 | `tools/encrypt.mjs` | Yes | Encrypts `private/plan.html` into `index.html`. Asks for the password; never saves it. |
 | `tools/lock-template.html` | Yes | The password page the encrypted planner is placed into. |
+| `logs/` | **No** (git‑ignored) | Your daily reports, `YYYY-MM-DD.md`. |
 | `index.html` | Yes | The generated locked page that GitHub Pages serves. |
 | `manifest.webmanifest`, `icons/` | Yes | Makes it an installable app (name, icon, colours). |
 | `sw.js` | Yes | Service worker: works offline, updates when online. Only caches the encrypted page. |
@@ -56,6 +61,47 @@ never gets pushed.
   The exported file is **not** encrypted, so keep it private.
 - If you change the password, export a backup first, then import it after
   unlocking with the new one (old saved data can't be read with a new password).
+
+## Daily logs (`logs/`, git‑ignored)
+
+`logs/` is in `.gitignore`, so your daily reports never get pushed.
+
+- **Chrome or Edge on the Mac:** Setup → **Choose logs folder** → pick
+  `~/Projects/daily-planner/logs` once. After that, **💾 Save log** writes
+  `YYYY-MM-DD.md` straight into it (it asks for permission again after a
+  browser restart). Tick "Save the log automatically" to save every time you copy
+  for Claude.
+- **Safari / iPhone:** Save log downloads the `.md` file; move it into `logs/`.
+
+Each log starts with a small YAML header (date, energy, Jonna, location, THE
+Thing done, blocks/habits done, workout), so an agent can read a folder of them.
+
+## Calendars
+
+**Google Calendar (live, read‑only).** One‑time setup, about 5 minutes:
+
+1. Go to <https://console.cloud.google.com/> → create a project (e.g. "Daily Planner").
+2. **APIs & Services → Library** → enable **Google Calendar API**.
+3. **OAuth consent screen** → External → fill in the app name and your email →
+   add the scope `.../auth/calendar.readonly` → add yourself under **Test users**.
+4. **Credentials → Create credentials → OAuth client ID** → *Web application* →
+   **Authorized JavaScript origins**: `https://alireza0511.github.io`
+   (add `http://localhost:8000` too if you test locally).
+5. Copy the **Client ID** into Planner → Setup → Calendars → **Connect Google**,
+   and pick which calendars to show.
+
+The access token stays in memory only (sign in again after locking). The
+Client ID is saved in your encrypted settings. Events show on the Day tab, and
+**+** turns one into a time block. The Google sign‑in popup works best in the
+browser; in the iPhone Home Screen app it may bounce out to Safari.
+
+**Apple Calendar.** Apple has no API a web page can use. Two options:
+
+- Add your Google account to Apple Calendar (iPhone Settings → Calendar →
+  Accounts). Both then show the same events, and the planner reads them through Google.
+- Export: **📅 Day → calendar** (one day's blocks) or Setup → **Export Dates**
+  (trip and Jonna's days). On iPhone/Mac, opening the `.ics` file offers to add
+  the events to Apple Calendar; Google Calendar imports it under Settings → Import.
 
 ## Update the planner
 
