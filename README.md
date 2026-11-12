@@ -34,6 +34,9 @@ never gets pushed.
   (3 Things, blocks, habits, shutdown, workout, Jonna, calendar, notes, last 7
   days) for your Claude agent. **💾 Save log** writes the same report to
   `logs/YYYY-MM-DD.md`. **📅 Day → calendar** exports the day's blocks as `.ics`.
+- **Deadlines:** a ⏰ Due soon card with a countdown (shown up to 14 days
+  ahead) and a "Make THE Thing" button. Comes with the speed ticket course
+  (due before Nov 17).
 - **Setup tab:** edit the default template (weekdays, Jonna / no‑Jonna,
   workout‑days only, buffer), Jonna's usual days, workout days, habits, and
   backups.
