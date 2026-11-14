@@ -98,7 +98,7 @@ Any static server works (`npx serve`, VS Code Live Server). You can also double-
    ```
 
 2. On GitHub, open the repo's **Settings → Pages**. Under **Build and deployment**, set **Source** to *Deploy from a branch*, then choose **Branch** `main` and folder `/ (root)`, and click **Save**.
-3. After a minute or so the app is live at `https://<your-username>.github.io/workout/`.
+3. Now lives in the `daily-planner` repo under `workout/`: `https://alireza0511.github.io/daily-planner/workout/`. The steps above are from when it was its own repo.
 
 GitHub Pages on a free account needs a **public** repo. Private repos can use Pages on GitHub Pro, Team or Enterprise plans.
 

@@ -5,12 +5,12 @@ a small menu linking to:
 
 - `daily/`: this daily planner (`https://alireza0511.github.io/daily-planner/daily/`)
 - `kids/`: Jonna's Star Plan (see `kids/README.md`)
-- Workout: placeholder for now
+- `workout/`: the workout tracker (see `workout/README.md`)
 
 The paths below are relative to `daily/`.
 
 An ADHD‑friendly daily planner, hosted on GitHub Pages. It's linked to the
-[Workout](https://alireza0511.github.io/workout/) app and Jonna's
+[Workout](https://alireza0511.github.io/daily-planner/workout/) app and Jonna's
 [Star Plan](https://alireza0511.github.io/daily-planner/kids/).
 
 The page on GitHub Pages is a **locked** page: a password box and an encrypted
