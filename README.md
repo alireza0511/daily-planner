@@ -34,6 +34,16 @@ never gets pushed.
   (3 Things, blocks, habits, shutdown, workout, Jonna, calendar, notes, last 7
   days) for your Claude agent. **💾 Save log** writes the same report to
   `logs/YYYY-MM-DD.md`. **📅 Day → calendar** exports the day's blocks as `.ics`.
+- **💼 Work card** (weekdays): write what you did at work. The time blocks
+  just show Work 8–11, lunch at 11:00, and Work 11:45–4:00.
+- **🍽️ Meals:** breakfast, lunch, dinner, snacks (autocompletes from what you've
+  eaten before) and "I cooked dinner". **🍳 What should I cook?** suggests 3
+  dinners from your ideas list (Setup → Dinner ideas). It skips what you cooked
+  in the last 5 days and prefers ⭐ Jonna‑friendly or ⚡ quick meals when that fits.
+- **👧 Jonna's routine:** her day (Setup → Jonna's routine) appears inside your
+  time blocks; switch it on/off with the button on the Time blocks card.
+- **Copy for Claude / 📤 Share:** copies the report, or on iPhone opens the
+  share sheet so you can send it straight to the Claude app.
 - **Deadlines:** a ⏰ Due soon card with a countdown (shown up to 14 days
   ahead) and a "Make THE Thing" button. Comes with the speed ticket course
   (due before Nov 17).
