@@ -27,7 +27,7 @@ A wrong code simply fails to decrypt.
 2. Re-lock it:
 
    ```bash
-   node tools/encrypt.mjs      # asks for the code twice, hidden
+   node kids/tools/encrypt.mjs   # asks for the code twice, hidden
    ```
 
 3. Publish:
@@ -55,7 +55,7 @@ gh api -X POST repos/{owner}/kids-palnner/pages -f "source[branch]=main" -f "sou
 
 (Or in the browser: repo → Settings → Pages → Deploy from branch → `main` / `(root)`.)
 
-The site will be at `https://<your-github-username>.github.io/kids-palnner/`.
+Now lives in the `daily-planner` repo under `kids/`: `https://alireza0511.github.io/daily-planner/kids/`. The steps above are from when it was its own repo.
 On the iPad: open it in Safari → Share → **Add to Home Screen**.
 
 ## Install as an app (PWA)

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Planners</title>
+<link rel="icon" href="daily/icons/favicon-32.png">
+<style>
+  :root { --bg: #f6f3ee; --card: #fff; --ink: #2b2925; --muted: #7a746a; --line: #e6e0d6; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1d1c1a; --card: #2a2825; --ink: #f1ede6; --muted: #a8a196; --line: #3a3733; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--ink);
+         font: 17px/1.4 -apple-system, system-ui, sans-serif; display: grid; place-items: center; padding: 24px 16px; }
+  main { width: 100%; max-width: 420px; }
+  h1 { font-size: 1.5rem; margin: 0 0 20px; text-align: center; }
+  a, .soon { display: flex; align-items: center; gap: 14px; padding: 18px; margin-bottom: 12px;
+             background: var(--card); border: 1px solid var(--line); border-radius: 16px; color: inherit; text-decoration: none; }
+  a:focus-visible { outline: 3px solid #ff8a3d; outline-offset: 2px; }
+  .ico { font-size: 2rem; }
+  .t { font-weight: 600; }
+  .s { color: var(--muted); font-size: .9rem; }
+  .soon { opacity: .55; }
+</style>
+<script>
+  // Remove the old root service worker left by the planner's previous location.
+  if ("serviceWorker" in navigator) navigator.serviceWorker.getRegistration("./").then(r => r && r.scope === new URL("./", location).href && r.unregister());
+</script>
+</head>
+<body>
+<main>
+  <h1>Planners</h1>
+  <a href="daily/"><span class="ico">🗓️</span><span><span class="t">Daily Planner</span><br><span class="s">My day, meals, work log</span></span></a>
+  <a href="kids/"><span class="ico">⭐</span><span><span class="t">Star Plan</span><br><span class="s">Jonna's daily plan and stars</span></span></a>
+  <div class="soon" aria-disabled="true"><span class="ico">🏋️</span><span><span class="t">Workout</span><br><span class="s">Coming soon</span></span></div>
+</main>
+</body>
+</html>

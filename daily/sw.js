@@ -2,7 +2,7 @@
 // The page is fetched network-first, so a new (re-encrypted) index.html shows up
 // as soon as you're online; the cached copy is only used when you're offline.
 // Everything cached here is the already-encrypted page, never your entries.
-const CACHE = "daily-planner-v1";
+const CACHE = "daily-planner-v2";
 const ASSETS = [
   "./",
   "./index.html",

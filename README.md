@@ -1,8 +1,17 @@
 # Daily Planner 🗓️
 
+This repo hosts several apps on one GitHub Pages site. `index.html` at the root is
+a small menu linking to:
+
+- `daily/`: this daily planner (`https://alireza0511.github.io/daily-planner/daily/`)
+- `kids/`: Jonna's Star Plan (see `kids/README.md`)
+- Workout: placeholder for now
+
+The paths below are relative to `daily/`.
+
 An ADHD‑friendly daily planner, hosted on GitHub Pages. It's linked to the
 [Workout](https://alireza0511.github.io/workout/) app and Jonna's
-[Star Plan](https://alireza0511.github.io/kids-palnner/).
+[Star Plan](https://alireza0511.github.io/daily-planner/kids/).
 
 The page on GitHub Pages is a **locked** page: a password box and an encrypted
 blob. The planner only appears after the right password is entered. The
@@ -123,7 +132,7 @@ browser; in the iPhone Home Screen app it may bounce out to Safari.
 2. Re‑lock it:
 
    ```bash
-   node tools/encrypt.mjs      # asks for the password twice, hidden
+   node daily/tools/encrypt.mjs   # asks for the password twice, hidden
    ```
 
 3. Publish:
@@ -146,7 +155,7 @@ gh repo create daily-planner --public --source=. --push
 gh api -X POST repos/{owner}/daily-planner/pages -f "source[branch]=main" -f "source[path]=/"
 ```
 
-The site will be at `https://alireza0511.github.io/daily-planner/`.
+The site will be at `https://alireza0511.github.io/daily-planner/` (menu) and `…/daily-planner/daily/` (planner).
 ## Install as an app (PWA)
 
 - **iPhone / iPad:** open the site in Safari → Share → **Add to Home Screen**.
