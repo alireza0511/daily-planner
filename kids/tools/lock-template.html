@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Star Plan">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ff8a3d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<title>Star Plan</title>
+<style>
+  :root { --pumpkin: #ff8a3d; --cranberry: #e5487f; --ink: #4b2a2a; --muted: #9a7563; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Chalkboard SE", "Comic Sans MS", system-ui, sans-serif; color: var(--ink);
+    background: linear-gradient(170deg, #ffe7d1 0%, #ffd9e4 55%, #ffe9c7 100%);
+    display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 16px;
+  }
+  .box { width: 100%; max-width: 360px; text-align: center; }
+  .hero { font-size: 64px; line-height: 1; }
+  h1 { font-size: 28px; margin: 10px 0 4px; color: var(--cranberry); }
+  p { margin: 0 0 18px; color: var(--muted); font-size: 17px; }
+  .dots { display: flex; justify-content: center; gap: 16px; margin: 0 0 22px; }
+  .dot { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--pumpkin); background: #fff; transition: background .15s; }
+  .dot.on { background: var(--pumpkin); }
+  .shake { animation: shake .4s; }
+  @keyframes shake { 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+  .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .pad button {
+    font: inherit; font-size: 30px; font-weight: 700; color: var(--ink); border: none; cursor: pointer;
+    background: #fff; border-radius: 50%; aspect-ratio: 1; box-shadow: 0 5px 0 #f1c7a8; touch-action: manipulation;
+  }
+  .pad button:active { transform: translateY(3px); box-shadow: 0 2px 0 #f1c7a8; }
+  .pad .blank { visibility: hidden; }
+  .pad .back { font-size: 24px; background: #ffe2cf; }
+  .msg { min-height: 26px; margin-top: 16px; font-size: 18px; color: var(--cranberry); }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="hero">🦃🔒</div>
+  <h1>Star Plan</h1>
+  <p>Tap the secret code</p>
+  <div class="dots" id="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <div class="pad" id="pad">
+    <button>1</button><button>2</button><button>3</button>
+    <button>4</button><button>5</button><button>6</button>
+    <button>7</button><button>8</button><button>9</button>
+    <button class="blank" aria-hidden="true" tabindex="-1"></button><button>0</button><button class="back" aria-label="Delete">⌫</button>
+  </div>
+  <div class="msg" id="msg"></div>
+</div>
+
+<script>
+  if ("serviceWorker" in navigator && window.isSecureContext) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+</script>
+<script id="payload" type="application/json">__PAYLOAD__</script>
+<script>
+(() => {
+  const P = JSON.parse(document.getElementById("payload").textContent);
+  const LEN = P.len, dots = [...document.querySelectorAll(".dot")], msg = document.getElementById("msg");
+  const dotsBox = document.getElementById("dots");
+  let code = "", busy = false;
+
+  const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const show = () => dots.forEach((d, i) => d.classList.toggle("on", i < code.length));
+
+  if (!window.crypto || !crypto.subtle) {
+    msg.textContent = "Please open this page with https:// 🙏";
+  }
+
+  async function unlock(pin) {
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: b64(P.salt), iterations: P.iter, hash: "SHA-256" },
+      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(P.iv) }, key, b64(P.ct));
+    return new TextDecoder().decode(plain);
+  }
+
+  async function tryCode() {
+    busy = true; msg.textContent = "🔓 Opening…";
+    try {
+      const html = await unlock(code);
+      document.open(); document.write(html); document.close();
+    } catch (e) {
+      msg.textContent = "Oops! Try again 💖";
+      dotsBox.classList.remove("shake"); void dotsBox.offsetWidth; dotsBox.classList.add("shake");
+      setTimeout(() => { code = ""; show(); busy = false; }, 450);
+    }
+  }
+
+  function press(k) {
+    if (busy) return;
+    if (k === "⌫") { code = code.slice(0, -1); msg.textContent = ""; }
+    else if (/^\d$/.test(k) && code.length < LEN) code += k;
+    show();
+    if (code.length === LEN) tryCode();
+  }
+
+  document.getElementById("pad").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (b && !b.classList.contains("blank")) press(b.textContent.trim());
+  });
+  document.addEventListener("keydown", e => {
+    if (/^\d$/.test(e.key)) press(e.key); else if (e.key === "Backspace") press("⌫");
+  });
+})();
+</script>
+</body>
+</html>
